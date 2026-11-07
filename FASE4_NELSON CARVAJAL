@@ -1,0 +1,55 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+
+from abc import ABC, abstractmethod
+from datetime import datetime
+import logging
+
+# CONFIGURACIÓN ARCHIVO LOGS
+
+logging.basicConfig(filename="software_fj.log", level=logging.INFO,format="%(asctime)s - %(levelname)s - %(message)s",
+                    encoding="utf-8")
+
+# EXCEPCIONES
+
+class ErrorSistema(Exception):
+      "Clase base para los errores propios del sistema"
+
+class DatoInvalidoError(ErrorSistema):
+     "Se genera cuando un dato no existe o es invalido"
+
+class ServicioNoDisponibleError(ErrorSistema):
+      "Se genera cuando un servicio no está disponible"
+
+class ReservaError(ErrorSistema):
+      "Se genera cuando no se puede realizar una reserva"
+
+
+#CLASE ABSTRACTA ENTIDAD
+
+class Entidad(ABC):
+    """Representa una entidad general del sistema."""
+
+    def __init__(self, identificacion, nombre):
+        if not identificacion or not str(identificacion).strip():
+            raise DatoInvalidoError("La identificación es obligatoria.")
+
+        if not nombre or not nombre.strip():
+            raise DatoInvalidoError("El nombre es obligatorio.")
+
+        self.__identificacion = str(identificacion).strip()
+        self.__nombre = nombre.strip()
+
+    @property
+    def identificacion(self):
+        return self.__identificacion
+
+    @property
+    def nombre(self):
+        return self.__nombre
+
+    @abstractmethod
+    def mostrar_informacion(self):
+        """Cada entidad concreta debe mostrar su información."""
+        pass
