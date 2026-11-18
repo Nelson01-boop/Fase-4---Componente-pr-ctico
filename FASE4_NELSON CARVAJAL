@@ -63,4 +63,68 @@ class Cliente(Entidad):
                raise DatoInvalidoError("El correo electrónico no es válido")
           if not telefono or not str(telefono).isdigit() or len(str(telefono)) <10:
                raise DatoInvalidoError("El teléfono debe contener al menos 10 digitos numéricos")
+          self.__correo = correo.strip()
+          self.__telefono = str(telefono)
+            
+     @property
+     def correo(self):
+          return self.__correo
+            
+     @property
+     def telefono(self):
+          return self.__telefono
+            
+     def mostrar_informacion(self):
+          return (f"Cliente: {self.nombre} | ID: {self.identificacion} | "
+                  f"Correo: {self.correo} | Teléfono: {self.telefono}")
 
+# CLASE ABSTRACTA SERVICIO
+
+class Servicio(ABC):
+    def __init__(self, codigo, nombre, tarifa, disponible=True):
+        if not codigo or not str(codigo).strip():
+            raise DatoInvalidoError("El código del servicio es obligatorio.")
+
+        if not nombre or not nombre.strip():
+            raise DatoInvalidoError("El nombre del servicio es obligatorio.")
+
+        if not isinstance(tarifa, (int, float)) or tarifa <= 0:
+            raise DatoInvalidoError("La tarifa debe ser un número mayor que cero.")
+
+        self.__codigo = str(codigo).strip()
+        self.__nombre = nombre.strip()
+        self.__tarifa = float(tarifa)
+        self.__disponible = bool(disponible)
+
+    @property
+    def codigo(self):
+        return self.__codigo
+
+    @property
+    def nombre(self):
+        return self.__nombre
+
+    @property
+    def tarifa(self):
+        return self.__tarifa
+
+    @property
+    def disponible(self):
+        return self.__disponible
+
+    def cambiar_disponibilidad(self, estado):
+        self.__disponible = bool(estado)
+
+    def validar_disponibilidad(self):
+        if not self.__disponible:
+            raise ServicioNoDisponibleError(
+                f"El servicio '{self.__nombre}' no está disponible."
+            )
+
+    @abstractmethod
+    def calcular_costo(self, cantidad, impuesto=0, descuento=0):
+        pass
+
+    @abstractmethod
+    def describir(self):
+        pass
