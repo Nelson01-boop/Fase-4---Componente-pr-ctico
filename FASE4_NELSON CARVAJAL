@@ -124,7 +124,43 @@ class Servicio(ABC):
     @abstractmethod
     def calcular_costo(self, cantidad, impuesto=0, descuento=0):
         pass
-
     @abstractmethod
     def describir(self):
         pass
+
+# SERVICIO 1 _ RESERVA DE SALAS
+
+class ReservaSala(Servicio):
+    def __init__(self, codigo, nombre, tarifa_hora, capacidad, disponible=True):
+        super().__init__(codigo, nombre, tarifa_hora, disponible)
+
+        if not isinstance(capacidad, int) or capacidad <= 0:
+            raise DatoInvalidoError("La capacidad debe ser un entero positivo.")
+
+        self.__capacidad = capacidad
+
+    def calcular_costo(self, cantidad, impuesto=0, descuento=0):
+        self.validar_disponibilidad()
+        if not isinstance(cantidad, (int, float)) or cantidad <= 0:
+            raise DatoInvalidoError("Las horas deben ser mayores que cero.")
+        if impuesto < 0 or descuento < 0 or descuento > 100:
+            raise DatoInvalidoError("Impuesto o descuento fuera de rango.")
+
+        subtotal = self.tarifa * cantidad
+        return subtotal * (1 + impuesto / 100) * (1 - descuento / 100)
+
+    def describir(self):
+        return (
+            f"Sala: {self.nombre} | Tarifa por hora: ${self.tarifa:,.0f} | "
+            f"Capacidad: {self.__capacidad} personas")
+
+    def validar_parametros(self, personas):
+        if not isinstance(personas, int) or personas <= 0:
+            raise DatoInvalidoError("La cantidad de personas debe ser positiva.")
+        if personas > self.__capacidad:
+            raise DatoInvalidoError(
+                f"La sala admite máximo {self.__capacidad} personas.")
+
+
+    
+
