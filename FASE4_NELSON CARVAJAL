@@ -349,6 +349,178 @@ class SistemaSoftwareFJ:
 
     def mostrar_reservas(self):
         print("\n--- RESERVAS REGISTRADAS ---")
+
         for reserva in self.reservas:
             print(reserva.mostrar_informacion())
 
+# PRUEBA MAS DE 10 OPERACIONES
+
+def ejecutar_pruebas():
+    sistema = SistemaSoftwareFJ()
+
+    print("=" * 65)
+    print(" SISTEMA INTEGRAL DE GESTIÓN - SOFTWARE FJ")
+    print("=" * 65)
+
+    # OPERACIÓN 1: registrar un cliente válido.
+    try:
+        cliente1 = Cliente("1001", "Laura Gómez",
+                           "laura@gmail.com", "3001234567")
+        sistema.registrar_cliente(cliente1)
+    except ErrorSistema as error:
+        logging.error("Operación 1: %s", error)
+        print("Error al registrar cliente:", error)
+
+    # OPERACIÓN 2: intentar registrar un cliente con correo inválido.
+    try:
+        cliente_invalido = Cliente("1002", "Carlos Pérez",
+                                   "correo incorrecto", "3007654321")
+        sistema.registrar_cliente(cliente_invalido)
+    except ErrorSistema as error:
+        logging.error("Operación 2: %s", error)
+        print("Operación 2 controlada:", error)
+
+def ejecutar_pruebas():
+    sistema = SistemaSoftwareFJ()
+
+    print("=" * 65)
+    print(" SISTEMA INTEGRAL DE GESTIÓN - SOFTWARE FJ")
+    print("=" * 65)
+
+    # OPERACIÓN 1: registrar un cliente válido.
+    try:
+        cliente1 = Cliente("1001", "Laura Gómez",
+                           "laura@gmail.com", "3001234567")
+        sistema.registrar_cliente(cliente1)
+    except ErrorSistema as error:
+        logging.error("Operación 1: %s", error)
+        print("Error al registrar cliente:", error)
+
+    # OPERACIÓN 2: intentar registrar un cliente con correo inválido.
+    try:
+        cliente_invalido = Cliente("1002", "Carlos Pérez",
+                                   "correo incorrecto", "3007654321")
+        sistema.registrar_cliente(cliente_invalido)
+    except ErrorSistema as error:
+        logging.error("Operación 2: %s", error)
+        print("Operación 2 controlada:", error)
+
+# OPERACIÓN 2: intentar registrar un cliente con correo inválido.
+    try:
+        cliente_invalido = Cliente("1002", "Carlos Pérez",
+                                   "correo incorrecto", "3007654321")
+        sistema.registrar_cliente(cliente_invalido)
+    except ErrorSistema as error:
+        logging.error("Operación 2: %s", error)
+        print("Operación 2 controlada:", error)
+
+    # OPERACIÓN 3: intentar registrar un cliente con teléfono inválido.
+    try:
+        cliente_invalido2 = Cliente("1003", "Ana Ruiz",
+                                    "ana@gmail.com", "ABC")
+        sistema.registrar_cliente(cliente_invalido2)
+    except ErrorSistema as error:
+        logging.error("Operación 3: %s", error)
+        print("Operación 3 controlada:", error)
+
+    # OPERACIÓN 4: registrar una sala.
+    sala = ReservaSala("S01", "Sala de reuniones", 50000, 12)
+    sistema.registrar_servicio(sala)
+
+    # OPERACIÓN 5: registrar equipos.
+    equipos = AlquilerEquipos("E01", "Video beam", 80000, 5)
+    sistema.registrar_servicio(equipos)
+
+    # OPERACIÓN 6: registrar una asesoría.
+    asesoria = AsesoriaEspecializada(
+        "A01", "Asesoría de software", 100000, "Desarrollo de software"
+    )
+    sistema.registrar_servicio(asesoria)
+
+    # OPERACIÓN 7: intentar crear un servicio con tarifa inválida.
+    try:
+        servicio_invalido = ReservaSala("S02", "Sala inválida", -20000, 10)
+        sistema.registrar_servicio(servicio_invalido)
+    except ErrorSistema as error:
+        logging.error("Operación 7: %s", error)
+        print("Operación 7 controlada:", error)
+
+    # OPERACIÓN 8: mostrar los servicios (polimorfismo).
+    sistema.mostrar_servicios()
+
+    # OPERACIÓN 9: crear y confirmar una reserva correctamente.
+    try:
+        reserva1 = Reserva("R001", cliente1, sala, 2, "Reunión de equipo")
+        sistema.registrar_reserva(reserva1)
+        valor = reserva1.confirmar(impuesto=19, descuento=5)
+        print(f"Reserva R001 confirmada. Total: ${valor:,.2f}")
+    except ErrorSistema as error:
+        logging.error("Operación 9: %s", error)
+        print("Error en operación 9:", error)
+
+    # OPERACIÓN 10: procesar la reserva confirmada.
+    try:
+        reserva1.procesar()
+        print("Reserva R001 procesada.")
+    except ErrorSistema as error:
+        logging.error("Operación 10: %s", error)
+        print("Error en operación 10:", error)
+
+    # OPERACIÓN 11: intentar confirmar una reserva con servicio no disponible.
+    try:
+        asesoria.cambiar_disponibilidad(False)
+        reserva2 = Reserva("R002", cliente1, asesoria, 1)
+        sistema.registrar_reserva(reserva2)
+        reserva2.confirmar()
+    except ErrorSistema as error:
+        logging.error("Operación 11: %s", error)
+        print("Operación 11 controlada:", error)
+    finally:
+        # finally se ejecuta exista o no una excepción.
+        print("Finalizó el intento de confirmación de R002.")
+
+    # OPERACIÓN 12: validar parámetros de una sala.
+    try:
+        sala.validar_parametros(20)
+    except ErrorSistema as error:
+        logging.error("Operación 12: %s", error)
+        print("Operación 12 controlada:", error)
+
+    # OPERACIÓN 13: demostrar el bloque try/except/else.
+    try:
+        costo = equipos.calcular_costo(3)
+    except ErrorSistema as error:
+        logging.error("Operación 13: %s", error)
+        print("No se pudo calcular el alquiler:", error)
+    else:
+        print(f"Operación 13: alquiler calculado correctamente: ${costo:,.2f}")
+
+    # OPERACIÓN 14: cancelar una reserva pendiente.
+    try:
+        reserva3 = Reserva("R003", cliente1, equipos, 2)
+        sistema.registrar_reserva(reserva3)
+        reserva3.cancelar()
+        print("Operación 14: reserva R003 cancelada.")
+    except ErrorSistema as error:
+        logging.error("Operación 14: %s", error)
+        print("Error en operación 14:", error)
+
+    # OPERACIÓN 15: demostrar encadenamiento de excepciones.
+    try:
+        reserva2.confirmar()
+    except ReservaError as error:
+        print("Operación 15: excepción controlada:", error)
+        if error.__cause__ is not None:
+            print("Causa original:", error.__cause__)
+        logging.error("Operación 15: %s", error)
+
+    sistema.mostrar_reservas()
+
+    print("\n" + "=" * 65)
+    print("PRUEBAS FINALIZADAS. El programa continúa ejecutándose.")
+    print("Los eventos y errores se encuentran en software_fj.log")
+    print("=" * 65)
+
+
+if __name__ == "__main__":
+    ejecutar_pruebas()
