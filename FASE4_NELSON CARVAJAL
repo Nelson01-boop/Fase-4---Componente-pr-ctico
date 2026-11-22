@@ -218,6 +218,137 @@ class AsesoriaEspecializada(Servicio):
         return (f"Asesoría: {self.nombre} | Tarifa por hora: ${self.tarifa:,.0f} | "
             f"Especialidad: {self.__especialidad}")
 
+# CLASE RESERVA
 
-    
+class Reserva:
+    def __init__(self, codigo, cliente, servicio, duracion, detalle=None):
+        if not codigo or not str(codigo).strip():
+            raise DatoInvalidoError("El código de la reserva es obligatorio.")
+
+        if not isinstance(cliente, Cliente):
+            raise DatoInvalidoError("La reserva debe estar asociada a un cliente.")
+
+        if not isinstance(servicio, Servicio):
+            raise DatoInvalidoError("La reserva debe tener un servicio válido.")
+
+        if not isinstance(duracion, (int, float)) or duracion <= 0:
+            raise DatoInvalidoError("La duración debe ser mayor que cero.")
+
+        self.__codigo = str(codigo).strip()
+        self.__cliente = cliente
+        self.__servicio = servicio
+        self.__duracion = duracion
+        self.__detalle = detalle
+        self.__estado = "Pendiente"
+        self.__costo = 0
+
+    @property
+    def codigo(self):
+        return self.__codigo
+
+    @property
+    def estado(self):
+        return self.__estado
+
+    @property
+    def costo(self):
+        return self.__costo
+
+    def confirmar(self, impuesto=0, descuento=0):
+        if self.__estado != "Pendiente":
+            raise ReservaError("Solo se pueden confirmar reservas pendientes.")
+
+        try:
+            self.__costo = self.__servicio.calcular_costo(
+                self.__duracion, impuesto, descuento
+            )
+            self.__estado = "Confirmada"
+            logging.info("Reserva %s confirmada. Costo: %.2f",
+                         self.__codigo, self.__costo)
+            return self.__costo
+        except ErrorSistema as error:
+            logging.error("No se pudo confirmar la reserva %s: %s",
+                          self.__codigo, error)
+            raise ReservaError(
+                f"No fue posible confirmar la reserva {self.__codigo}."
+            ) from error
+
+    def cancelar(self):
+        if self.__estado == "Cancelada":
+            raise ReservaError("La reserva ya se encuentra cancelada.")
+        if self.__estado == "Procesada":
+            raise ReservaError("No se puede cancelar una reserva procesada.")
+
+        self.__estado = "Cancelada"
+        logging.info("Reserva %s cancelada.", self.__codigo)
+
+    def procesar(self):
+        if self.__estado != "Confirmada":
+            raise ReservaError(
+                "La reserva debe estar confirmada antes de procesarse."
+            )
+
+        self.__estado = "Procesada"
+        logging.info("Reserva %s procesada correctamente.", self.__codigo)
+
+    def mostrar_informacion(self):
+        return (
+            f"Reserva: {self.__codigo} | Cliente: {self.__cliente.nombre} | "
+            f"Servicio: {self.__servicio.nombre} | Duración: {self.__duracion} | "
+            f"Estado: {self.__estado} | Costo: ${self.__costo:,.2f}")
+
+# CLASE PRINCIPAL _ ADMINISTRAR LISTAS
+
+class SistemaSoftwareFJ:
+    def __init__(self):
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
+
+    def registrar_cliente(self, cliente):
+        if not isinstance(cliente, Cliente):
+            raise DatoInvalidoError("El objeto que intenta registrar no es Cliente.")
+
+        for existente in self.clientes:
+            if existente.identificacion == cliente.identificacion:
+                raise DatoInvalidoError("Ya existe un cliente con esa identificación.")
+
+        self.clientes.append(cliente)
+        logging.info("Cliente registrado: %s", cliente.identificacion)
+        print("Cliente registrado correctamente.")
+
+    def registrar_servicio(self, servicio):
+        if not isinstance(servicio, Servicio):
+            raise DatoInvalidoError("El objeto que intenta registrar no es Servicio.")
+
+        for existente in self.servicios:
+            if existente.codigo == servicio.codigo:
+                raise DatoInvalidoError("Ya existe un servicio con ese código.")
+
+        self.servicios.append(servicio)
+        logging.info("Servicio registrado: %s", servicio.codigo)
+        print("Servicio registrado correctamente.")
+
+    def registrar_reserva(self, reserva):
+        if not isinstance(reserva, Reserva):
+            raise DatoInvalidoError("El objeto que intenta registrar no es Reserva.")
+
+        for existente in self.reservas:
+            if existente.codigo == reserva.codigo:
+                raise DatoInvalidoError("Ya existe una reserva con ese código.")
+
+        self.reservas.append(reserva)
+        logging.info("Reserva creada: %s", reserva.codigo)
+        print("Reserva creada correctamente.")
+
+    def mostrar_servicios(self):
+        print("\n--- SERVICIOS DISPONIBLES ---")
+        for servicio in self.servicios:
+            # Polimorfismo: se ejecuta describir() según el tipo de servicio.
+            print(servicio.describir())
+
+    def mostrar_reservas(self):
+        print("\n--- RESERVAS REGISTRADAS ---")
+        for reserva in self.reservas:
+            print(reserva.mostrar_informacion())
 
