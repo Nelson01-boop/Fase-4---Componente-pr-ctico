@@ -53,6 +53,7 @@ class Entidad(ABC):
     def mostrar_informacion(self):
         """Cada entidad concreta debe mostrar su información."""
         pass
+
 # CLASE CLIENTE
 
 class Cliente(Entidad):
@@ -118,8 +119,7 @@ class Servicio(ABC):
     def validar_disponibilidad(self):
         if not self.__disponible:
             raise ServicioNoDisponibleError(
-                f"El servicio '{self.__nombre}' no está disponible."
-            )
+                f"El servicio '{self.__nombre}' no está disponible.")
 
     @abstractmethod
     def calcular_costo(self, cantidad, impuesto=0, descuento=0):
@@ -160,6 +160,63 @@ class ReservaSala(Servicio):
         if personas > self.__capacidad:
             raise DatoInvalidoError(
                 f"La sala admite máximo {self.__capacidad} personas.")
+
+# SERVICO 2 _ ALQUIKER DE EQUIPOS
+
+class AlquilerEquipos(Servicio):
+    def __init__(self, codigo, nombre, tarifa_dia, cantidad_disponible,
+                 disponible=True):
+        super().__init__(codigo, nombre, tarifa_dia, disponible)
+
+        if not isinstance(cantidad_disponible, int) or cantidad_disponible < 0:
+            raise DatoInvalidoError("La cantidad disponible debe ser un entero igual o mayor que cero.")
+
+        self.__cantidad_disponible = cantidad_disponible
+
+    def calcular_costo(self, cantidad, impuesto=0, descuento=0):
+        self.validar_disponibilidad()
+        if not isinstance(cantidad, (int, float)) or cantidad <= 0:
+            raise DatoInvalidoError("Los días deben ser mayores que cero.")
+        if impuesto < 0 or descuento < 0 or descuento > 100:
+            raise DatoInvalidoError("Impuesto o descuento fuera de rango.")
+
+        subtotal = self.tarifa * cantidad
+        return subtotal * (1 + impuesto / 100) * (1 - descuento / 100)
+
+    def describir(self):
+        return (f"Equipo: {self.nombre} | Tarifa por día: ${self.tarifa:,.0f} | "
+            f"Unidades disponibles: {self.__cantidad_disponible}")
+
+    def validar_parametros(self, unidades):
+        if not isinstance(unidades, int) or unidades <= 0:
+            raise DatoInvalidoError("Las unidades deben ser un entero positivo.")
+        if unidades > self.__cantidad_disponible:
+            raise ServicioNoDisponibleError(f"Solo hay {self.__cantidad_disponible} unidades disponibles.")
+# SERVICIO 3 _ ASESORIAS
+
+class AsesoriaEspecializada(Servicio):
+    def __init__(self, codigo, nombre, tarifa_hora, especialidad,
+                 disponible=True):
+        super().__init__(codigo, nombre, tarifa_hora, disponible)
+
+        if not especialidad or not especialidad.strip():
+            raise DatoInvalidoError("Debe indicar la especialidad de la asesoría.")
+
+        self.__especialidad = especialidad.strip()
+
+    def calcular_costo(self, cantidad, impuesto=0, descuento=0):
+        self.validar_disponibilidad()
+        if not isinstance(cantidad, (int, float)) or cantidad <= 0:
+            raise DatoInvalidoError("Las horas deben ser mayores que cero.")
+        if impuesto < 0 or descuento < 0 or descuento > 100:
+            raise DatoInvalidoError("Impuesto o descuento fuera de rango.")
+
+        subtotal = self.tarifa * cantidad
+        return subtotal * (1 + impuesto / 100) * (1 - descuento / 100)
+
+    def describir(self):
+        return (f"Asesoría: {self.nombre} | Tarifa por hora: ${self.tarifa:,.0f} | "
+            f"Especialidad: {self.__especialidad}")
 
 
     
